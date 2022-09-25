@@ -43,7 +43,7 @@ export const TokenMap = {
   [TokenType.LanguageConstant]: 'LanguageConstant',
 }
 
-const RE_LINE_COMMENT_START = /^#/
+const RE_LINE_COMMENT_START = /^\/\//
 const RE_SELECTOR = /^[\.a-zA-Z\d\-\:>]+/
 const RE_WHITESPACE = /^ +/
 const RE_CURLY_OPEN = /^\{/
