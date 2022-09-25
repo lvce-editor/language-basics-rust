@@ -1,0 +1,12 @@
+{
+  "id": "builtin.language-basics-rust",
+  "name": "Language Basics Rust",
+  "description": "Provides syntax highlighting and bracket matching in Rust files.",
+  "languages": [
+    {
+      "id": "rust",
+      "extensions": [".rs"],
+      "tokenize": "src/tokenizeRust.js"
+    }
+  ]
+}
