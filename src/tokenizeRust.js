@@ -5,6 +5,7 @@ export const State = {
   TopLevelContent: 1,
   InsideString: 2,
   InsideLineComment: 3,
+  InsideBlockComment: 10,
 }
 
 export const StateMap = {
@@ -63,9 +64,17 @@ const RE_KEYWORD =
 const RE_VARIABLE_NAME = /^[a-zA-Z\_]+/
 const RE_PUNCTUATION = /^[:,;\{\}\[\]\.=\(\)<>]/
 const RE_NUMERIC = /^\d+/
+const RE_SLASH = /^\//
+const RE_BLOCK_COMMENT_START = /^\/\*/
+const RE_BLOCK_COMMENT_CONTENT = /^.+?(?=\*\/)/
+const RE_BLOCK_COMMENT_END = /^\*\//
+const RE_ANYTHING_UNTIL_END = /^.+/s
 
 export const initialLineState = {
   state: State.TopLevelContent,
+  /**
+   * @type {any[]}
+   */
   tokens: [],
 }
 
@@ -99,6 +108,18 @@ export const tokenizeLine = (line, lineState) => {
               break
           }
           state = State.TopLevelContent
+        } else if ((next = part.match(RE_SLASH))) {
+          if ((next = part.match(RE_BLOCK_COMMENT_START))) {
+            token = TokenType.Comment
+            state = State.InsideBlockComment
+          } else if ((next = part.match(RE_LINE_COMMENT_START))) {
+            token = TokenType.Comment
+            state = State.InsideLineComment
+          } else {
+            next = part.match(RE_SLASH)
+            token = TokenType.Punctuation
+            state = State.TopLevelContent
+          }
         } else if ((next = part.match(RE_PUNCTUATION))) {
           token = TokenType.Punctuation
           state = State.TopLevelContent
@@ -137,6 +158,20 @@ export const tokenizeLine = (line, lineState) => {
         if ((next = part.match(RE_ANYTHING))) {
           token = TokenType.Comment
           state = State.TopLevelContent
+        } else {
+          throw new Error('no')
+        }
+        break
+      case State.InsideBlockComment:
+        if ((next = part.match(RE_BLOCK_COMMENT_END))) {
+          token = TokenType.Comment
+          state = State.TopLevelContent
+        } else if ((next = part.match(RE_BLOCK_COMMENT_CONTENT))) {
+          token = TokenType.Comment
+          state = State.InsideBlockComment
+        } else if ((next = part.match(RE_ANYTHING_UNTIL_END))) {
+          token = TokenType.Comment
+          state = State.InsideBlockComment
         } else {
           throw new Error('no')
         }
