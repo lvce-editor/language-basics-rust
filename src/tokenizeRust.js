@@ -3,7 +3,7 @@
  */
 export const State = {
   TopLevelContent: 1,
-  InsideString: 2,
+  InsideDoubleQuoteString: 2,
   InsideLineComment: 3,
   InsideBlockComment: 10,
 }
@@ -46,7 +46,7 @@ export const TokenMap = {
 
 const RE_LINE_COMMENT_START = /^\/\//
 const RE_SELECTOR = /^[\.a-zA-Z\d\-\:>]+/
-const RE_WHITESPACE = /^ +/
+const RE_WHITESPACE = /^\s+/
 const RE_CURLY_OPEN = /^\{/
 const RE_CURLY_CLOSE = /^\}/
 const RE_PROPERTY_NAME = /^[a-zA-Z\-]+\b/
@@ -57,18 +57,23 @@ const RE_COMMA = /^,/
 const RE_ANYTHING = /^.+/s
 const RE_ANYTHING_UNTIL_CLOSE_BRACE = /^[^\}]+/
 const RE_QUOTE_DOUBLE = /^"/
-const RE_STRING_DOUBLE_QUOTE_CONTENT = /^[^"]+/
 const RE_KEYWORD =
   /^(?:as|break|const|continue|crate|else|enum|extern|false|fn|for|if|impl|in|let|loop|match|mod|move|mut|pub|ref|return|self|static|struct|super|trait|true|type|unsafe|where|while)\b/
 
-const RE_VARIABLE_NAME = /^[a-zA-Z\_]+/
-const RE_PUNCTUATION = /^[:,;\{\}\[\]\.=\(\)<>]/
+const RE_PUNCTUATION = /^[:,;\{\}\[\]\.=\(\)<>\&,;!#\-?\|]/
 const RE_NUMERIC = /^\d+/
 const RE_SLASH = /^\//
 const RE_BLOCK_COMMENT_START = /^\/\*/
 const RE_BLOCK_COMMENT_CONTENT = /^.+?(?=\*\/)/
 const RE_BLOCK_COMMENT_END = /^\*\//
 const RE_ANYTHING_UNTIL_END = /^.+/s
+const RE_QUOTE_SINGLE = /^'/
+const RE_QUOTE_BACKTICK = /^`/
+const RE_STRING_SINGLE_QUOTE_CONTENT = /^[^'\\]+/
+const RE_STRING_DOUBLE_QUOTE_CONTENT = /^[^"\\]+/
+const RE_STRING_ESCAPE = /^\\./
+const RE_BACKSLASH = /^\\/
+const RE_VARIABLE_NAME = /^[a-zA-Z_$][a-zA-Z\d\_]*/
 
 export const initialLineState = {
   state: State.TopLevelContent,
@@ -130,12 +135,13 @@ export const tokenizeLine = (line, lineState) => {
           token = TokenType.Numeric
           state = State.TopLevelContent
         } else if ((next = part.match(RE_QUOTE_DOUBLE))) {
-          token = TokenType.PunctuationString
-          state = State.InsideString
+          token = TokenType.Punctuation
+          state = State.InsideDoubleQuoteString
         } else if ((next = part.match(RE_LINE_COMMENT_START))) {
           token = TokenType.Comment
           state = State.InsideLineComment
         } else if ((next = part.match(RE_ANYTHING))) {
+          console.log({ part })
           token = TokenType.Text
           state = State.TopLevelContent
         } else {
@@ -143,13 +149,19 @@ export const tokenizeLine = (line, lineState) => {
           throw new Error('no')
         }
         break
-      case State.InsideString:
+      case State.InsideDoubleQuoteString:
         if ((next = part.match(RE_QUOTE_DOUBLE))) {
-          token = TokenType.PunctuationString
+          token = TokenType.Punctuation
           state = State.TopLevelContent
         } else if ((next = part.match(RE_STRING_DOUBLE_QUOTE_CONTENT))) {
           token = TokenType.String
-          state = State.InsideString
+          state = State.InsideDoubleQuoteString
+        } else if ((next = part.match(RE_STRING_ESCAPE))) {
+          token = TokenType.String
+          state = State.InsideDoubleQuoteString
+        } else if ((next = part.match(RE_BACKSLASH))) {
+          token = TokenType.String
+          state = State.InsideDoubleQuoteString
         } else {
           throw new Error('no')
         }
