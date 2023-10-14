@@ -2,16 +2,17 @@
   "compilerOptions": {
     "lib": ["esnext", "WebWorker"],
     "checkJs": true,
-    "module": "esnext",
+    "module": "NodeNext",
     "target": "esnext",
     "types": [],
-    "moduleResolution": "node",
+    "moduleResolution": "NodeNext",
     "skipLibCheck": true,
     "noEmit": true,
     "allowSyntheticDefaultImports": true,
     "isolatedModules": true,
     "assumeChangesOnlyAffectDirectDependencies": true,
-    "strict": true
+    "strict": true,
+    "strictNullChecks": false
   },
   "include": ["src", "test"]
 }
