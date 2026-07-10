@@ -8,5 +8,6 @@
       "extensions": [".rs"],
       "tokenize": "src/tokenizeRust.js"
     }
-  ]
+  ],
+  "repository": "https://github.com/lvce-editor/language-basics-rust"
 }
